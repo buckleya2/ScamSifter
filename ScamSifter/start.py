@@ -74,7 +74,7 @@ def main():
     # filter spam and send email alert
     clean=filter_spam(out)
 
-    print('%s non-spam postings' % (len(clean))) 
+    logging.info('%s non-spam postings' % (len(clean))) 
 
     email_id=compose_email(clean, mailto, maps_key, gmail_creds)
     logging.info('Email ID %s sent' % (email_id))
