@@ -13,8 +13,8 @@ def main():
     parser=argparse.ArgumentParser(description='ScamSifter: a command line tool that searches craigslist and filters out scam postings')
     parser.add_argument('base_path', type=str, nargs=1, help='base output path for files')
     parser.add_argument('api', type=str, nargs=1, help='path to file with Google maps API key')
-    parser.add_argument('mailto', type=str, nargs=1, help='email address to send alters to')
     parser.add_argument('gmail_creds', type=str, nargs=1, help='path to Gmail token json file')
+    parser.add_argument('mailto', type=str, nargs=1, help='email address to send alters to')
     arguments=parser.parse_args()
     base_path=arguments.base_path[0]
     api=arguments.api[0]
