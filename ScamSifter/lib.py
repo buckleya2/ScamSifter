@@ -16,7 +16,7 @@ def scrape_data(url_list: list)-> dict:
     """
     Function that takes in a list of URLs and pulls data from craigslist with a sleep timer from 2-10 seconds
     
-    @param url_list: list of craigslist post URLs to scrape
+    @param url_list: list of craigslist listing URLs to scrape
     @returns: a dictionary with URL as key and BeautifulSoup object as the value
     """
     soup_dict={}
@@ -29,15 +29,15 @@ def scrape_data(url_list: list)-> dict:
         time.sleep(np.random.randint(2,10))
         scrape_count+=1
         if scrape_count % 10 == 0:
-            print("%s listings completed / %s total" % (scrape_count, len(url_list)))
+            print('%s listings completed / %s total' % (scrape_count, len(url_list)))
     return(soup_dict)
 
 def extract_links(soup_list: list) -> dict:
     """
-    Function that extracts individual craiglist posting URLs from a craiglist search URL
+    Function that extracts individual craiglist listing URLs from a craiglist search URL
     
     @param soup_list: a list of BeautifulSoup objects scraped from craigslist search URLs
-    @returns: a dict with the posting ID as the key and posting URL as value
+    @returns: a dict with the listing ID as the key and listing URL as value
     """
     url_dict={}
     links=[re.findall(r'http[s]?:.*apa.*html', str(soup)) for soup in soup_list]
@@ -52,7 +52,7 @@ def search_links(stem: str, database: list) -> dict:
     
     @param stem: a base craiglist URL describing a rental search
     @param database: a list of all CL post ids currently in text database
-    @returns:
+    @returns: filtered list of only new URLs
     """
     # scrape first results page to determine max results
     CL_dict=scrape_data([stem])
@@ -72,41 +72,41 @@ def search_links(stem: str, database: list) -> dict:
 
 def get_and_resize_image(soup: bs4.BeautifulSoup) -> MIMEImage:
     """
-    Function that finds address to main image of craiglist post, and formats the image
+    Function that finds URL of main image of craigslist post, and formats the image into a MIMEImage
     
-    @param soup: a Beautiful soup object of a craigslist post
+    @param soup: a Beautiful soup object of a craigslist listing
     @returns: a MIMEImage object of a 200 x 200 image PNG
     """
     # get primary image URL from post 
     first_image=get_first(soup.findAll('img', {'title' : 1}))
     image_url=first_image['src']
 
-    # get raw encoding of image, first comvert to PNG, then to MIMEImage
-    r = requests.get(image_url, stream = True)
+    # get raw encoding of image, first convert to PNG, then to MIMEImage
+    r = requests.get(image_url, stream=True)
     if r.status_code == 200:
         img=Image.open(io.BytesIO(r.content))
         small=img.resize((200, 200))
         # convert to PNG encoding
-        buf = io.BytesIO()
+        buf=io.BytesIO()
         small.save(buf, format='PNG')
         return(MIMEImage(buf.getvalue()))
 
 def count_title_emoji(soup: bs4.BeautifulSoup) -> int:
     """
-    Function that counts the number of emojis in the post title
+    Function that counts the number of emojis in the listing title
     
-    @param soup: BeauftifulSoup object created from a craigslist posting
-    @returns: the number of emojis in the posting title
+    @param soup: BeauftifulSoup object created from a craigslist listing
+    @returns: the number of emojis in the listing title
     """
     emojitext=get_first(soup.findAll('title'))
     return(sum([x in emoji.EMOJI_DATA for x in emojitext]))
 
-def parse_posting_info(soup: bs4.BeautifulSoup) -> tuple:
+def parse_listing_info(soup: bs4.BeautifulSoup) -> tuple:
     """
-    Function that extracts out post ID and posting time
+    Function that extracts out listing ID and listing time
     
-    @param soup: BeauftifulSoup object created from a craigslist posting
-    @returns: a tuple with posting ID, and posting date
+    @param soup: BeauftifulSoup object created from a craigslist listing
+    @returns: a tuple with listing ID, and listing date
     """
     post_info=soup.findAll('p', {'class' : 'postinginfo'})
     post_id, posted=(None, None)
@@ -116,18 +116,18 @@ def parse_posting_info(soup: bs4.BeautifulSoup) -> tuple:
         if 'post id' in text:
             post_id=text.split(":")[1].strip()
         elif 'posted' in text:
-            posted=text.split(":")[1].strip().split(" ")[0]                   
+            posted=text.split(":")[1].strip().split(" ")[0]       
     return(post_id, posted)
 
 def get_coords(soup: bs4.BeautifulSoup)-> tuple:
     """
-    Function that pulls latitude and longitude coordinates from post
+    Function that pulls latitude and longitude coordinates from listing
     
-    @params soup: BeautifulSoup object created from a craigslist posting
+    @params soup: BeautifulSoup object created from a craigslist listing
     @returns: a tuple of (latitude, longitude)
     """
     try: 
-        map_info=soup.findAll('div', {'class' : 'viewposting'})[0]
+        map_info=soup.findAll('div', {'class': 'viewposting'})[0]
         lat=map_info['data-latitude']
         long=map_info['data-longitude']
         return((lat,long))
@@ -138,8 +138,8 @@ def get_posting_text(soup: bs4.BeautifulSoup) -> tuple:
     """
     This function extracts the main post text and checks for web links (indicative of scams)
     
-    @param soup: BeautifulSoup object created from a craigslist posting
-    @returns: tuple containing a T/F indicator whether the listing text contains web links and the first 100 characters of the listing text
+    @param soup: BeautifulSoup object created from a craigslist listing
+    @returns: tuple containing a boolean indicator whether the listing text contains web links and the first 100 characters of the listing text
     """
     links=False
     body_soup=get_first(soup.findAll('section', {'id' : 'postingbody'}))
@@ -156,8 +156,8 @@ def dog_friendliness(soup: bs4.BeautifulSoup) -> str:
     """
     Function to look for pet friendliness indicators in post soup or post body text
     
-    @param soup: BeautifulSoup object created from a craigslist posting
-    @returns: an indicator of dog friendliness, can be: yes, no, or unknown
+    @param soup: BeautifulSoup object created from a craigslist listing
+    @returns: an indicator of dog friendliness, can be yes, no, or unknown
     """ 
     doggo='unknown'
     # first look for tag indicating dog friendly
@@ -172,9 +172,9 @@ def get_scam(soup: bs4.BeautifulSoup, keywords: list) -> bool:
     """
     Function that searches listing soup object for scam keywords defined in parameters.py
     
-    @param soup: BeautifulSoup object created from a craigslist posting
+    @param soup: BeautifulSoup object created from a craigslist listing
     @param keywords: a list of keywords to search for
-    @returns: T/F indicator of whether any of the keywords are present
+    @returns: boolean indicator of whether any of the keywords are present
     """
     scam=bool(re.search(r'|'.join(keywords), soup.text.lower()))
     return(scam)
@@ -185,19 +185,19 @@ def metrics_from_soup(soup: bs4.BeautifulSoup, url: str, keywords: list, maps_ke
     This function collects a number of metrics from the listing soup object
     
     lat, long - latitude and longitude
-    posting id, posted - when post was created
-    price
+    posting id, posted - when listing was created
+    price - price
     images - number of images attached to posting
     emoji - number of emojis in post title
-    scam - a T/F indicator for scam keywords
+    scam - boolean indicator for scam keywords
     dog - yes, no, unknown indicator of dog friendliness
-    links - T/F indicator of web links in post text
-    post_image - binary representation of main post image
+    links - boolean indicator of web links in listing text
+    post_image - binary representation of main listing image
     snippet - first 100 characters of the listing text
-    address - a list with address, zipcode, neighborhood, and locality 
+    address - a list with address, zipcode, neighborhood, and locality
 
-    @param soup: BeautifulSoup object created from a craigslist posting
-    @param url: URL for craigslist post
+    @param soup: BeautifulSoup object created from a craigslist listing
+    @param url: URL for craigslist listing
     @param keywords: a list of keywords to search for
     @param maps_key: API ket to Google maps
     @returns: a dataframe of metrics 
@@ -209,26 +209,25 @@ def metrics_from_soup(soup: bs4.BeautifulSoup, url: str, keywords: list, maps_ke
     posting_id, posted=parse_posting_info(soup)
     lat, long=get_coords(soup)
     dog=dog_friendliness(soup)
-    links, snippet=get_posting_text(soup)
+    links, snippet=get_listing_text(soup)
     post_image=get_and_resize_image(soup)
     address=reverse_lookup(maps_key, lat, long)
     postal_address, zipcode, neighborhood, locality=address
     print(postal_address)
     results_dict={posting_id : 
-     {'url' : url,
-      'price' : price,
-      'num_images' : images,
-      'dog' : dog,
-      'scam' : scam,
-      'links' : links,
-      'emoji' : emoji,
-      'locality' : locality,
-      'date_posted' : posted,
-      'latitude' : lat,
-      'longitude' : long,
-      'post_image' : post_image,
-      'snippet' : snippet
-    }}
+     {'url': url,
+      'price': price,
+      'num_images': images,
+      'dog': dog,
+      'scam': scam,
+      'links': links,
+      'emoji': emoji,
+      'locality': locality,
+      'date_posted': posted,
+      'latitude': lat,
+      'longitude': long,
+      'post_image': post_image,
+      'snippet': snippet}}
     
     df=pd.DataFrame.from_dict(results_dict, columns=list(results_dict[posting_id].keys()), orient='index') 
     return(df)

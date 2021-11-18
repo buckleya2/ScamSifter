@@ -3,7 +3,7 @@ from email.mime.image import MIMEImage
 
 def parse_address(json) -> list:
     """
-    Function that parses the Gogle maps API json output 
+    Function that parses the Google maps API json output 
     
     @param json: Google's reverse lookup json object
     @returns: a list with address, zipcode, neighborhood, and locality (Google defined)
@@ -36,26 +36,25 @@ def reverse_lookup(key: str, lat: str, long: str) -> list:
     address=parse_address(json)
     return(address)
 
-def get_map(lat, long, api_key):
+def get_map(lat: str, long: str, api_key: str) -> MIMEImage:
     """
-    Function to create a google stat map from a latitude, longitude pair
+    Function to create a Google static map from a latitude, longitude pair
     
     @param lat: latitude
     @param long: longitude
     @param api: google maps API key
-    @returns: a MIMEImage object of a google map PNG
+    @returns: a MIMEImage object of a Google map PNG
     """
     # set parameters to create google map
-    url = "https://maps.googleapis.com/maps/api/staticmap?"
+    url = 'https://maps.googleapis.com/maps/api/staticmap?'
     center_lat=str(lat)
     center_long=str(long)
-    zoom = 10
-    r = requests.get(url,
-                     params={"center" : center_lat + ',' + center_long,
-                             "zoom" : str(zoom),
-                             "size" : "200x200",
-                             "markers" :  center_lat + ',' + center_long,
-                            "key" : api_key})
+    zoom=10
+    r=requests.get(url, params={'center': center_lat + ',' + center_long,
+                             'zoom': str(zoom),
+                             'size': "200x200",
+                             'markers':  center_lat + ',' + center_long,
+                            'key': api_key})
     if r.status_code == 200:
         image=MIMEImage(r.content)
     else:
