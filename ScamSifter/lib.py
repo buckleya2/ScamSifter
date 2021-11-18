@@ -134,7 +134,7 @@ def get_coords(soup: bs4.BeautifulSoup)-> tuple:
     except:
         return((None, None))
     
-def get_posting_text(soup: bs4.BeautifulSoup) -> tuple:
+def get_listing_text(soup: bs4.BeautifulSoup) -> tuple:
     """
     This function extracts the main post text and checks for web links (indicative of scams)
     
@@ -206,14 +206,13 @@ def metrics_from_soup(soup: bs4.BeautifulSoup, url: str, keywords: list, maps_ke
     images=len(soup.findAll("a", {"class":"thumb"}))
     emoji=count_title_emoji(soup)
     scam=get_scam(soup, keywords)
-    posting_id, posted=parse_posting_info(soup)
+    posting_id, posted=parse_listing_info(soup)
     lat, long=get_coords(soup)
     dog=dog_friendliness(soup)
     links, snippet=get_listing_text(soup)
     post_image=get_and_resize_image(soup)
     address=reverse_lookup(maps_key, lat, long)
     postal_address, zipcode, neighborhood, locality=address
-    print(postal_address)
     results_dict={posting_id : 
      {'url': url,
       'price': price,

@@ -33,12 +33,13 @@ def main():
 
     # set up logging
     curr_time=datetime.datetime.today().strftime("%d%m%Y_%H:%M")
-    logging.basicConfig(filename=os.path.join(log_path, curr_time + '.log.txt'), format='%(message)s    %(asctime)s',
+    logging.basicConfig(filename=os.path.join(log_path, curr_time + '.log.txt'), format='%(asctime)s    %(message)s',
                    level=logging.INFO, filemode='w')
 
     # check for database file, if not present, create empty database list
     database_file=os.path.join(database_path, 'listing.database.txt')
     if not os.path.exists(database_file):
+        logging.info('No database file %s, scraping all links' % (database_file))
         database=[]
     else:
         database=pd.read_csv(database_file, header=None)[0].values
@@ -59,27 +60,28 @@ def main():
     fails=0
     for key, value in CL_dict.items():
         try:
-            print(metrics_from_soup(value, key, SCAM_KEYWORDS, maps_key))
             outlist.append(metrics_from_soup(value, key, SCAM_KEYWORDS, maps_key))
         except:
             logging.info('Listing ID %s failed' % (key))
             fails+=1
 
     # make dataframe
-    out=pd.concat(outlist).reset_index()
-
+    try:
+        out=pd.concat(outlist).reset_index()
+    except:
+        logging.info('No new listings to add')
+        return(None)
     # filter spam and send email alert
     clean=filter_spam(out)
 
     print('%s non-spam postings' % (len(clean))) 
 
     email_id=compose_email(clean, mailto, maps_key, gmail_creds)
-    logging.info('Email ID %s sen' % (email_id))
-
+    logging.info('Email ID %s sent' % (email_id))
     try:
-        FIN=pd.concat([pd.Series(database), out['index']])
-        FIN.to_csv(database_file)
+        new_database=[str(x) for x in database] + out['index'].tolist()
+        with open(database_file, 'w') as f:
+            [f.write('%s\n' % x) for x in new_database]
+        logging.info('%s listings added to database, %s listings failed' % (len(out), fails))
     except:
         logging.info('failure to update database file')
-    logging.info('%s listings added to database, %s listings failed' % (len(out), fails))
-    return()
