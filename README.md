@@ -7,12 +7,12 @@ Note: Scam Sifter is a personal project, meant for educational purposes only.
 
 ## Installation Instructions
 
-First install miniconda http://docs.conda.io/en/latest/miniconda.html
+Install miniconda: http://docs.conda.io/en/latest/miniconda.html
 
-Requirements can be installed using
+Install requirements: 
 ```pip3 install -r requirements.txt```
 
-ScamSifter can be installed using
+Install ScamSifter: 
 ```python setup.py install```
 
 In addition to these requirements, ScamSifter requires Google maps and Gmail API tokens
