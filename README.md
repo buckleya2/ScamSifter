@@ -29,7 +29,7 @@ In addition to these requirements, ScamSifter requires Google maps and Gmail API
 
 Example command line usage
 
-```ScamSifter /PATH/TO/OUTPUT /PATH/TO/API_FILE```
+```ScamSifter /PATH/TO/OUTPUT /PATH/TO/MAPS_API /PATH/TO/GMAIL_API/token.json EMAIL_ADDRESS```
 
 
 ## Outputs
