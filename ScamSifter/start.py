@@ -28,7 +28,7 @@ def main():
     # import craigslist search stem URLs from parameters.py
     searches=list(SEARCH_STEMS.values())    
 
-    # first check if requires directories are present, if not, create
+    # first check if required directories are present, if not, create
     log_path, database_path=create_paths(base_path)
 
     # set up logging
@@ -49,7 +49,7 @@ def main():
     recent_urls=[search_links(stem, database) for stem in searches]
     flat_urls=[item for sublist in recent_urls for item in sublist]    
 
-    logging.info("scraping %s links" % (len(set(flat_urls))))
+    logging.info('scraping %s links' % (len(set(flat_urls))))
 
     # scrape data for these urls 
     CL_dict=scrape_data(flat_urls)
@@ -62,7 +62,7 @@ def main():
             print(metrics_from_soup(value, key, SCAM_KEYWORDS, maps_key))
             outlist.append(metrics_from_soup(value, key, SCAM_KEYWORDS, maps_key))
         except:
-            logging.info("Listing ID %s failed" % (key))
+            logging.info('Listing ID %s failed' % (key))
             fails+=1
 
     # make dataframe
@@ -71,13 +71,15 @@ def main():
     # filter spam and send email alert
     clean=filter_spam(out)
 
-    print("%s non-spam postings" % (len(clean))) 
+    print('%s non-spam postings' % (len(clean))) 
 
-    compose_email(clean, mailto, maps_key, gmail_creds)
+    email_id=compose_email(clean, mailto, maps_key, gmail_creds)
+    logging.info('Email ID %s sen' % (email_id))
+
     try:
         FIN=pd.concat([pd.Series(database), out['index']])
         FIN.to_csv(database_file)
     except:
-        logging.info("failure to update database file")
-    logging.info("%s listings added to database, %s listings failed" % (len(out), fails))
+        logging.info('failure to update database file')
+    logging.info('%s listings added to database, %s listings failed' % (len(out), fails))
     return()
