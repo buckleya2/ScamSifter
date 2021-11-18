@@ -51,8 +51,10 @@ ScamSifter will sift through the craigslist search results and send an email tit
 The email contains key facts about the listing, a Google map showing the approximate location, and the first image from the craigslist post.
 
 #### Example email on desktop
-<img width="704" alt="ScamSifter desktop" src="https://user-images.githubusercontent.com/9369719/142356477-91107149-a61b-438f-8756-43b068882510.png">
+![ScamSifter desktop](https://user-images.githubusercontent.com/9369719/142356950-6859720a-a930-4a14-9bf2-eb73069e8c80.png)
+
 #### Example email on mobile
-<img width="520" alt="ScamSifter mobile" src="https://user-images.githubusercontent.com/9369719/142356680-7430d2bd-9d57-458b-b822-1c2306b7d0e7.png">
+![ScamScraper mobile](https://user-images.githubusercontent.com/9369719/142356941-6453e90a-2806-44d0-810d-a158f0854f57.png)
+
 
 Up to 20 listings will be returned in each email, if more than 20 listings around returned multiple emails will be sent
