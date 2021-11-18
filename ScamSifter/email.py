@@ -1,4 +1,3 @@
-import io
 import base64
 import email 
 import io
@@ -29,12 +28,12 @@ def make_post_text(values: pd.DataFrame) -> str:
 
 def make_email_dict(df: pd.DataFrame, maps_key: str) -> dict:
     """
-    A function that assembles a dict describing the content of the altert email. The dict has one record per
+    A function that assembles a dict describing the content of the alert email. The dict has one record per
     listing. The key is the text desired for the email notification. The value is a list of images to attach.
-    Email altert should have 2 images, a google MAP showing the location and one thumbnail from the post
+    Email alert should have 2 images, a Google map showing the location and one thumbnail from the post
     
     @param df: scam filtered pd.Dataframe with listing information
-    @param maps_key: API ket to Google maps
+    @param maps_key: API key to Google maps
     @returns: email_dict, a dictionary with email HTML encoded test as key, images to attach as values
     """
     email_dict={}
@@ -96,7 +95,7 @@ def create_email(sender: str, to: str, subject: str, email_dict: dict):
     @param to: recipient 
     @param subject: title of email
     @param email_dict: output of make_email_dict, a dict with the email body text as a key, the images to attach as values
-    @returns: base64 encoding of the email message in a dict format for gmail API
+    @returns: base64 encoding of the email message in a dict format for Gmail API
     """
     # initiate message
     message = MIMEMultipart('related')
@@ -116,35 +115,36 @@ def create_email(sender: str, to: str, subject: str, email_dict: dict):
     message=add_images(message, email_dict)
     return({'raw': base64.urlsafe_b64encode(message.as_bytes()).decode()})
 
-def send_message(creds: str, message: dict):
+def send_message(creds: str, message: dict) -> str:
     """
-    Function that sends message via gmail API
+    Function that sends message via Gmail API
     
-    @param cred: gmail API credentials json filepath
+    @param cred: Gmail API credentials json filepath
     @param message: output of create_email, a dict containing base64 encoded MIME message
-    @returns: None, prints confirmation to screen
+    @returns: message id
     """
     cred = Credentials.from_authorized_user_file(creds)
     SCOPES = ['https://www.googleapis.com/auth/gmail.send']                                         
     service = build('gmail', 'v1', credentials=cred)
     message = (service.users().messages().send(userId='me', body=message).execute())
-    print('Message Id: %s' % message['id'])
+    return('Message Id: %s' % message['id'])
 
-def compose_email(df: pd.DataFrame, mailto: str, maps_key: str, gmail_creds: str) -> None:
+def compose_email(df: pd.DataFrame, mailto: str, maps_key: str, gmail_creds: str) -> str:
     """
     Function that generates HTML encoded email alert for new postings
     
     @param df: scam filtered pd.Dataframe with listing information
     @param mailto: address to send email alter to
     @param maps_key: API ket to Google maps
-    @param: gmail_creds: path to Gmail API credentials JSON file
-    @returns: None, sends email
+    @param gmail_creds: path to Gmail API credentials JSON file
+    @returns: message ID
     """
-    
     email_dict=make_email_dict(df, maps_key)
     alerts=list(email_dict.keys())
     # for every 20 listings, generate one email alert
+    ids=[]
     for i in range(0,len(alerts),20):
         subset={x: email_dict[x] for x in alerts[i:i+20]}
         message=create_email('me', mailto, 'Housing Email Alert', subset)
-        send_message(gmail_creds, message)
+        ids.append(send_message(gmail_creds, message))
+    return(' '.join(ids))
