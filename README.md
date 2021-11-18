@@ -49,8 +49,10 @@ Example usage: ```ScamSifter /PATH/TO/OUTPUT MAPS_API.txt GMAIL_API.json EMAIL_A
 
 ScamSifter will sift through the craigslist search results and send an email titled 'Housing Email Alert'. 
 The email contains key facts about the listing, a Google map showing the approximate location, and the first image from the craigslist post.
-<img width="704" alt="ScamSifter desktop" src="https://user-images.githubusercontent.com/9369719/142356477-91107149-a61b-438f-8756-43b068882510.png">
-![ScamScraper mobile](https://user-images.githubusercontent.com/9369719/142356495-ec4459d6-c58b-4371-801c-fe3206681e27.png)
 
+### Example email on desktop
+<img width="704" alt="ScamSifter desktop" src="https://user-images.githubusercontent.com/9369719/142356477-91107149-a61b-438f-8756-43b068882510.png">
+### Example email on mobile
+![ScamScraper mobile](https://user-images.githubusercontent.com/9369719/142356495-ec4459d6-c58b-4371-801c-fe3206681e27.png)
 
 Up to 20 listings will be returned in each email, if more than 20 listings around returned multiple emails will be sent
